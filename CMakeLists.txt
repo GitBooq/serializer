@@ -5,6 +5,8 @@ project(Serializer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(BUILD_TESTS "Build tests" ON)
+
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -32,4 +34,8 @@ PRIVATE
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/inlet.in)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inlet.in 
                    ${CMAKE_CURRENT_BINARY_DIR}/inlet.in COPYONLY)
+endif()
+
+if(BUILD_TESTS)
+  add_subdirectory(tests)
 endif()
