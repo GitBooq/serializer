@@ -1,0 +1,146 @@
+// ListSerializer.cpp
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "ListSerializer.hpp"
+
+// HELPERS
+namespace {
+// Endianness convertors
+
+// Convert integral types to Little-endian byte order
+//
+template <std::integral T> static T ToLittleEndian(T value) {
+  if constexpr (std::endian::native == std::endian::big) {
+    // reverse byte order
+    T reversed = 0;
+    for (size_t byteIndex = 0; byteIndex < sizeof(T); ++byteIndex) {
+      const T byteMask = 0xFF;
+      T sourceByte = ((value >> (byteIndex * CHAR_BIT)) & byteMask);
+      size_t destOffset = (sizeof(T) - 1 - byteIndex) * CHAR_BIT;
+      reversed |= sourceByte << destOffset;
+    }
+    return reversed;
+  } else {
+    return value; // no change required on Little-endian systems
+  }
+}
+
+// Convert integral types to Little-endian byte order
+//
+template <std::integral T> static T FromLittleEndian(T value) {
+  return ToLittleEndian(value);
+}
+
+// Write raw bytes from value to output stream (os) taking into account
+// Endianess if value is integral type
+//
+template <typename T>
+  requires std::is_trivially_copyable_v<T>
+static void Write(std::ostream &os, const T &value) {
+  if constexpr (std::is_integral_v<T>) {
+    T le_value = ToLittleEndian(value);
+    os.write(reinterpret_cast<const char *>(&le_value), sizeof(T));
+  } else {
+    os.write(reinterpret_cast<const char *>(&value), sizeof(T));
+  }
+}
+
+// Overload for c-style strings
+// Write len chars from data to output stream (os)
+//
+static void Write(std::ostream &os, const char *data, size_t len) {
+  os.write(data, len);
+}
+
+// Read raw bytes from istream (is) to value taking into account Endianess
+// if value is integral type
+//
+template <typename T>
+  requires std::is_trivially_copyable_v<T>
+static void Read(std::istream &is, T &value) {
+  is.read(reinterpret_cast<char *>(&value), sizeof(T));
+  if constexpr (std::is_integral_v<T>) {
+    value = FromLittleEndian(value);
+  }
+}
+
+// Overload for c-style strings
+// Read len chars from istream (is) to char buffer
+//
+static void Read(std::istream &is, char *buf, size_t len) { is.read(buf, len); }
+
+} // namespace
+
+ListSerializer::ListSerializer(const LinkedList &list) : list_(list) {
+  auto indexMap = buildIndexMap(list);
+  nodeToIdx_ = std::move(indexMap);
+}
+
+// Binary Representation:
+//  NodesCount(32bit), [dataLen(32bit), data(dataLen bytes), randIdx(32bit)] *
+//  NodesCount times
+//
+bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
+  std::ofstream out(outFilename, std::ios::binary);
+  if (!out.is_open())
+    return false;
+
+  /*  write nodesCnt */
+  uint32_t nodesCnt = getNodeCount();
+  Write(out, nodesCnt);
+
+  for (const auto &node : list_) {
+    /* write data length */
+    uint32_t dataLen = static_cast<uint32_t>(node.data.length());
+    Write(out, dataLen);
+
+    /* write data */
+    const char *data = node.data.c_str();
+    Write(out, data, dataLen);
+
+    /* write rand index */
+    uint32_t randIdx =
+        (node.rand) ? (nodeToIdx_.find(node.rand))->second : NULL_INDEX;
+    Write(out, randIdx);
+  }
+  return true;
+}
+
+LinkedList ListSerializer::fromBinaryFile(const std::string &inputFilename) {
+  std::ifstream input(inputFilename);
+
+  // read nodesCnt
+  uint32_t nodesCnt;
+  Read(input, nodesCnt);
+
+  std::vector<std::string> data(nodesCnt);
+  std::vector<uint32_t> randIndices(nodesCnt);
+
+  for (uint32_t i = 0; i < nodesCnt; ++i) {
+    // read data length
+    uint32_t dataLen;
+    Read(input, dataLen);
+    if (dataLen > DATA_MAX_SZ) {
+      std::cerr << "Invalid data size\n";
+      return {};
+    }
+
+    // read data
+    data[i].resize(dataLen);
+    Read(input, data[i].data(), static_cast<size_t>(dataLen));
+
+    // read rand index
+    Read(input, randIndices[i]);
+  }
+
+  return buildList(data, randIndices);
+}
+
+LinkedList
+ListSerializer::buildList(const std::vector<std::string> &strings,
+                          const std::vector<uint32_t> &rand_indices) {
+  return ListBuilder::fromMemory(strings, rand_indices);
+}
