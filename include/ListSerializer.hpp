@@ -28,8 +28,8 @@ private:
     return static_cast<uint32_t>(nodeToIdx_.size());
   }
 
-  static LinkedList buildList(const std::vector<std::string> &strings,
-                              const std::vector<uint32_t> &rand_indices);
+  static LinkedList buildList(const std::vector<std::string> &data,
+                              const std::vector<uint32_t> &randIndices);
 
 public:
   explicit ListSerializer(const LinkedList *list);

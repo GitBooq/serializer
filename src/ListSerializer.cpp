@@ -154,7 +154,7 @@ LinkedList ListSerializer::fromBinaryFile(const std::string &inputFilename) {
 }
 
 LinkedList
-ListSerializer::buildList(const std::vector<std::string> &strings,
-                          const std::vector<uint32_t> &rand_indices) {
-  return ListBuilder::fromMemory(strings, rand_indices);
+ListSerializer::buildList(const std::vector<std::string> &data,
+                          const std::vector<uint32_t> &randIndices) {
+  return ListBuilder::fromMemory(data, randIndices);
 }
