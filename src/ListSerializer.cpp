@@ -2,7 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
+
 
 #include "ListSerializer.hpp"
 
@@ -74,9 +76,21 @@ static void Read(std::istream &is, char *buf, size_t len) { is.read(buf, len); }
 
 } // namespace
 
-ListSerializer::ListSerializer(const LinkedList &list) : list_(list) {
-  auto indexMap = buildIndexMap(list);
+ListSerializer::ListSerializer(const LinkedList *list) : list_(list) {
+  auto indexMap = buildIndexMap(*list);
   nodeToIdx_ = std::move(indexMap);
+}
+
+ListSerializer::ListSerializer(ListSerializer &&other) noexcept
+    : list_(std::exchange(other.list_, nullptr)),
+      nodeToIdx_(std::move(other.nodeToIdx_)) {}
+
+ListSerializer &ListSerializer::operator=(ListSerializer &&other) noexcept {
+  if (this != &other) {
+    list_ = std::exchange(other.list_, nullptr);
+    nodeToIdx_ = std::move(other.nodeToIdx_);
+  }
+  return *this;
 }
 
 // Binary Representation:
@@ -92,7 +106,7 @@ bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
   uint32_t nodesCnt = getNodeCount();
   Write(out, nodesCnt);
 
-  for (const auto &node : list_) {
+  for (const auto &node : *list_) {
     /* write data length */
     uint32_t dataLen = static_cast<uint32_t>(node.data.length());
     Write(out, dataLen);

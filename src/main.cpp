@@ -40,7 +40,7 @@ int main() {
   LinkedList list = ListBuilder::fromTextFile(inputFilename);
 
   // Serialization
-  ListSerializer ls(list);
+  ListSerializer ls(&list);
   if (!ls.toBinaryFile(outputFilename)) {
     std::cerr << "Can't open file" << std::endl;
     return EXIT_FAILURE;
