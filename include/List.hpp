@@ -2,9 +2,13 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
-#include <memory>
-#include <string>
-#include <unordered_map>
+#include <cstdint>        // for uint32_t
+#include <cstddef>        // for size_t, ptrdiff_t
+#include <iterator>       // for bidirectional_iterator_tag
+#include <memory>         // for unique_ptr
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
+#include <vector>         // for vector
 
 struct ListNode {
   ListNode *prev = nullptr; // указатель на предыдущий элемент или nullptr

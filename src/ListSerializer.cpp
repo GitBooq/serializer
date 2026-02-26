@@ -1,12 +1,17 @@
 // ListSerializer.cpp
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <utility>
-#include <vector>
-
-
-#include "ListSerializer.hpp"
+#include <cstddef>             // for size_t
+#include <cstdint>             // for uint32_t
+#include <bit>                 // for endian
+#include <climits>             // for CHAR_BIT
+#include <concepts>            // for integral
+#include <fstream>             // for operator<<, basic_ostream, basic_istream
+#include <iostream>            // for cerr
+#include <string>              // for char_traits, string, basic_string, ope...
+#include <unordered_map>       // for unordered_map, operator==, _Node_const...
+#include <utility>             // for exchange, move, pair
+#include <vector>              // for vector
+#include "List.hpp"            // for LinkedList, buildIndexMap, ListBuilder
+#include "ListSerializer.hpp"  // for ListSerializer
 
 // HELPERS
 namespace {

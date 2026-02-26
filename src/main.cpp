@@ -25,12 +25,11 @@
 //  output file: outlet.out
 //
 
-#include <fstream>
-#include <iostream>
-#include <vector>
-
-#include "List.hpp"
-#include "ListSerializer.hpp"
+#include <cstdlib>             // for EXIT_FAILURE
+#include <iostream>            // for char_traits, basic_ostream, endl, oper...
+#include <string>              // for allocator, string, operator<<
+#include "List.hpp"            // for LinkedList, operator==, ListBuilder
+#include "ListSerializer.hpp"  // for ListSerializer
 
 int main() {
   static std::string inputFilename{"inlet.in"};

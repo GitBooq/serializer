@@ -2,14 +2,13 @@
 #ifndef LIST_SERIALIZER_HPP
 #define LIST_SERIALIZER_HPP
 
-#include <concepts>
-#include <cstdint>
-#include <fstream>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-
-#include "List.hpp"
+#include <cstddef>        // for size_t
+#include <cstdint>        // for uint32_t
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
+#include <vector>         // for vector
+class LinkedList;
+struct ListNode;
 
 // Binary format:
 //  NodesCount(32bit), [dataLen(32bit), data(dataLen bytes), randIdx(32bit)] *

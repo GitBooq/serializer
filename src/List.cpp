@@ -1,10 +1,14 @@
 // List.cpp
-#include <fstream>
-#include <iostream>
-#include <unordered_map>
-#include <vector>
-
-#include "List.hpp"
+#include <cstddef>        // for size_t
+#include <cstdint>        // for uint32_t
+#include <fstream>        // for char_traits, basic_istream, basic_ostream
+#include <iostream>       // for cerr
+#include <memory>         // for unique_ptr, make_unique
+#include <string>         // for string, operator==, getline, operator<<, stoi
+#include <unordered_map>  // for unordered_map, operator==, _Node_iterator
+#include <utility>        // for move, pair
+#include <vector>         // for vector
+#include "List.hpp"       // for ListNode, LinkedList, ListBuilder, buildInd...
 
 void LinkedList::Deleter::operator()(ListNode *head) const {
   while (head) {
