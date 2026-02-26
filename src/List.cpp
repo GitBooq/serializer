@@ -1,14 +1,15 @@
 // List.cpp
-#include <cstddef>        // for size_t
-#include <cstdint>        // for uint32_t
-#include <fstream>        // for char_traits, basic_istream, basic_ostream
-#include <iostream>       // for cerr
-#include <memory>         // for unique_ptr, make_unique
-#include <string>         // for string, operator==, getline, operator<<, stoi
-#include <unordered_map>  // for unordered_map, operator==, _Node_iterator
-#include <utility>        // for move, pair
-#include <vector>         // for vector
-#include "List.hpp"       // for ListNode, LinkedList, ListBuilder, buildInd...
+#include "List.hpp"      // for ListNode, LinkedList, ListBuilder, buildInd...
+#include <cstddef>       // for size_t
+#include <cstdint>       // for uint32_t
+#include <fstream>       // for char_traits, basic_istream, basic_ostream
+#include <iostream>      // for cerr
+#include <memory>        // for unique_ptr, make_unique
+#include <string>        // for string, operator==, getline, operator<<, stoi
+#include <unordered_map> // for unordered_map, operator==, _Node_iterator
+#include <utility>       // for move, pair
+#include <vector>        // for vector
+
 
 void LinkedList::Deleter::operator()(ListNode *head) const {
   while (head) {
@@ -106,8 +107,7 @@ LinkedList ListBuilder::fromMemory(const std::vector<std::string> &vdata,
 
   // link rand
   for (size_t i = 0; i < nodes.size(); ++i) {
-    if (randIndices[i] >= 0 &&
-        randIndices[i] < static_cast<uint32_t>(nodes.size())) {
+    if (randIndices[i] < static_cast<uint32_t>(nodes.size())) {
       nodes[i]->rand = nodes[randIndices[i]].get();
     }
   }
@@ -139,8 +139,10 @@ bool operator==(const LinkedList &lhs, const LinkedList &rhs) {
   if (lhs.size() != rhs.size())
     return false;
 
-  std::unordered_map<const ListNode *, uint32_t> lhsIndexMap = buildIndexMap(lhs);
-  std::unordered_map<const ListNode *, uint32_t> rhsIndexMap = buildIndexMap(rhs);
+  std::unordered_map<const ListNode *, uint32_t> lhsIndexMap =
+      buildIndexMap(lhs);
+  std::unordered_map<const ListNode *, uint32_t> rhsIndexMap =
+      buildIndexMap(rhs);
 
   auto lhsIt = lhs.cbegin();
   auto rhsIt = rhs.cbegin();
