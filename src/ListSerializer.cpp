@@ -137,8 +137,13 @@ bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
     }
 
     /* write rand index */
-    uint32_t randIdx =
-        (node.rand) ? (nodeToIdx_.find(node.rand))->second : NULL_INDEX;
+    uint32_t randIdx = NULL_INDEX;
+    if (node.rand) {
+        auto it = nodeToIdx_.find(node.rand);
+        if (it != nodeToIdx_.end()) {
+            randIdx = it->second;
+        }
+    }
     if (!Write(out, randIdx)) {
       std::cerr << "write error\n";
       return false;
