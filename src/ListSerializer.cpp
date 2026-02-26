@@ -62,17 +62,27 @@ static void Write(std::ostream &os, const char *data, size_t len) {
 //
 template <typename T>
   requires std::is_trivially_copyable_v<T>
-static void Read(std::istream &is, T &value) {
+static bool Read(std::istream &is, T &value) {
   is.read(reinterpret_cast<char *>(&value), sizeof(T));
+  if (is.fail() || is.gcount() != sizeof(T)) {
+    return false; // read error
+  }
   if constexpr (std::is_integral_v<T>) {
     value = FromLittleEndian(value);
   }
+  return true;
 }
 
 // Overload for c-style strings
 // Read len chars from istream (is) to char buffer
 //
-static void Read(std::istream &is, char *buf, size_t len) { is.read(buf, len); }
+static bool Read(std::istream &is, char *buf, size_t len) { 
+  is.read(buf, len);
+  if (is.fail() || static_cast<size_t>(is.gcount()) != len) {
+    return false; // read error
+  }
+  return true;
+}
 
 } // namespace
 
@@ -124,11 +134,18 @@ bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
 }
 
 LinkedList ListSerializer::fromBinaryFile(const std::string &inputFilename) {
-  std::ifstream input(inputFilename);
+  std::ifstream input(inputFilename, std::ios::binary);
+  if (!input.is_open()) {
+    std::cerr << "Can't open file " << inputFilename << '\n';
+    return {};
+  }
 
   // read nodesCnt
   uint32_t nodesCnt;
-  Read(input, nodesCnt);
+  if (!Read(input, nodesCnt)) {
+    std::cerr << "Read error\n";
+    return {};
+  }
 
   std::vector<std::string> data(nodesCnt);
   std::vector<uint32_t> randIndices(nodesCnt);
@@ -136,7 +153,10 @@ LinkedList ListSerializer::fromBinaryFile(const std::string &inputFilename) {
   for (uint32_t i = 0; i < nodesCnt; ++i) {
     // read data length
     uint32_t dataLen;
-    Read(input, dataLen);
+    if (!Read(input, dataLen)) {
+      std::cerr << "Read error\n";
+      return {};
+    }
     if (dataLen > DATA_MAX_SZ) {
       std::cerr << "Invalid data size\n";
       return {};
@@ -144,10 +164,16 @@ LinkedList ListSerializer::fromBinaryFile(const std::string &inputFilename) {
 
     // read data
     data[i].resize(dataLen);
-    Read(input, data[i].data(), static_cast<size_t>(dataLen));
+    if (!Read(input, data[i].data(), static_cast<size_t>(dataLen))) {
+      std::cerr << "Read error\n";
+      return {};
+    }
 
     // read rand index
-    Read(input, randIndices[i]);
+    if (!Read(input, randIndices[i])) {
+      std::cerr << "Read error\n";
+      return {};
+    }
   }
 
   return buildList(data, randIndices);
