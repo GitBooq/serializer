@@ -41,20 +41,22 @@ template <std::integral T> static T FromLittleEndian(T value) {
 //
 template <typename T>
   requires std::is_trivially_copyable_v<T>
-static void Write(std::ostream &os, const T &value) {
+static bool Write(std::ostream &os, const T &value) {
   if constexpr (std::is_integral_v<T>) {
     T le_value = ToLittleEndian(value);
     os.write(reinterpret_cast<const char *>(&le_value), sizeof(T));
   } else {
     os.write(reinterpret_cast<const char *>(&value), sizeof(T));
   }
+  return !os.fail();
 }
 
 // Overload for c-style strings
 // Write len chars from data to output stream (os)
 //
-static void Write(std::ostream &os, const char *data, size_t len) {
+static bool Write(std::ostream &os, const char *data, size_t len) {
   os.write(data, len);
+  return !os.fail();
 }
 
 // Read raw bytes from istream (is) to value taking into account Endianess
@@ -114,21 +116,33 @@ bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
 
   /*  write nodesCnt */
   uint32_t nodesCnt = getNodeCount();
-  Write(out, nodesCnt);
+  if (!Write(out, nodesCnt)) {
+    std::cerr << "write error\n";
+    return false;
+  }
 
   for (const auto &node : *list_) {
     /* write data length */
     uint32_t dataLen = static_cast<uint32_t>(node.data.length());
-    Write(out, dataLen);
+    if (!Write(out, dataLen)) {
+      std::cerr << "write error\n";
+      return false;
+    }
 
     /* write data */
     const char *data = node.data.c_str();
-    Write(out, data, dataLen);
+    if (!Write(out, data, dataLen)) {
+      std::cerr << "write error\n";
+      return false;
+    }
 
     /* write rand index */
     uint32_t randIdx =
         (node.rand) ? (nodeToIdx_.find(node.rand))->second : NULL_INDEX;
-    Write(out, randIdx);
+    if (!Write(out, randIdx)) {
+      std::cerr << "write error\n";
+      return false;
+    }
   }
   return true;
 }
