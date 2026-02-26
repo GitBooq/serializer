@@ -135,13 +135,15 @@ bool operator==(const LinkedList &lhs, const LinkedList &rhs) {
   if (lhs.size() != rhs.size())
     return false;
 
-  std::unordered_map<const ListNode *, uint32_t> index_lhs = buildIndexMap(lhs);
-  std::unordered_map<const ListNode *, uint32_t> index_rhs = buildIndexMap(rhs);
+  std::unordered_map<const ListNode *, uint32_t> lhsIndexMap = buildIndexMap(lhs);
+  std::unordered_map<const ListNode *, uint32_t> rhsIndexMap = buildIndexMap(rhs);
 
-  auto lhsIt = lhs.begin();
-  auto rhsIt = rhs.begin();
+  auto lhsIt = lhs.cbegin();
+  auto rhsIt = rhs.cbegin();
 
-  for (; lhsIt != lhs.end(); ++lhsIt, ++rhsIt) {
+  auto lhsEnd = lhs.cend();
+  auto rhsEnd = rhs.cend();
+  for (; (lhsIt != lhsEnd) && (rhsIt != rhsEnd); ++lhsIt, ++rhsIt) {
     if (lhsIt->data != rhsIt->data)
       return false;
 
@@ -150,9 +152,11 @@ bool operator==(const LinkedList &lhs, const LinkedList &rhs) {
     if (lhsIt->rand == nullptr || rhsIt->rand == nullptr)
       return false;
 
-    size_t idx_lhs = index_lhs[lhsIt->rand];
-    size_t idx_rhs = index_rhs[rhsIt->rand];
-    if (idx_lhs != idx_rhs)
+    auto lhsIdxIt = lhsIndexMap.find(lhsIt->rand);
+    auto rhsIdxIt = rhsIndexMap.find(rhsIt->rand);
+    if ((lhsIdxIt == lhsIndexMap.end()) || (rhsIdxIt == rhsIndexMap.end()))
+      return false;
+    if (lhsIdxIt->second != rhsIdxIt->second)
       return false;
   }
 
