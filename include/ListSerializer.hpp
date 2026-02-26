@@ -17,7 +17,7 @@
 
 class ListSerializer {
 private:
-  const LinkedList* list_;
+  const LinkedList *list_;
   std::unordered_map<const ListNode *, uint32_t> nodeToIdx_;
 
   static constexpr uint32_t NULL_INDEX{0xFFFFFFFF}; // -1
@@ -38,7 +38,7 @@ public:
   ListSerializer(const ListSerializer &) = delete;
   ListSerializer &operator=(const ListSerializer &) = delete;
 
-  // no move
+  // move
   ListSerializer(ListSerializer &&other) noexcept;
   ListSerializer &operator=(ListSerializer &&other) noexcept;
 
