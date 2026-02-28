@@ -2,11 +2,11 @@
 #ifndef LIST_SERIALIZER_HPP
 #define LIST_SERIALIZER_HPP
 
-#include <cstddef>        // for size_t
-#include <cstdint>        // for uint32_t
-#include <string>         // for string
-#include <unordered_map>  // for unordered_map
-#include <vector>         // for vector
+#include <cstddef>       // for size_t
+#include <cstdint>       // for uint32_t
+#include <string>        // for string
+#include <unordered_map> // for unordered_map
+#include <vector>        // for vector
 class LinkedList;
 struct ListNode;
 
@@ -17,7 +17,9 @@ struct ListNode;
 class ListSerializer {
 private:
   const LinkedList *list_;
-  std::unordered_map<const ListNode *, uint32_t> nodeToIdx_;
+  std::unordered_map<const ListNode *, uint32_t>
+      nodeToIdx_; // only for profiling.
+                  // Better to use vector here
 
   static constexpr uint32_t NULL_INDEX{0xFFFFFFFF}; // -1
   static constexpr size_t DATA_MAX_SZ = 1000;
