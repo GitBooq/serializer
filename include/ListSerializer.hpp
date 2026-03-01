@@ -17,9 +17,7 @@ struct ListNode;
 class ListSerializer {
 private:
   const LinkedList *list_;
-  std::unordered_map<const ListNode *, uint32_t>
-      nodeToIdx_; // only for profiling.
-                  // Better to use vector here
+  std::unordered_map<const ListNode *, uint32_t> nodeToIdx_; // fast search
 
   static constexpr uint32_t NULL_INDEX{0xFFFFFFFF}; // -1
   static constexpr size_t DATA_MAX_SZ = 1000;
