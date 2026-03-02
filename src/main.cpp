@@ -41,7 +41,7 @@ int main() {
   // Serialization
   ListSerializer ls(&list);
   if (!ls.toBinaryFile(outputFilename)) {
-    std::cerr << "Can't open file" << std::endl;
+    std::cerr << "Serializaton error" << std::endl;
     return EXIT_FAILURE;
   }
 

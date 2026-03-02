@@ -116,8 +116,11 @@ ListSerializer &ListSerializer::operator=(ListSerializer &&other) noexcept {
 //
 bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
   std::ofstream out(outFilename, std::ios::binary);
-  if (!out.is_open())
+  if (!out.is_open()) {
+    std::cerr << "Can't open file\n";
     return false;
+  }
+    
 
   /*  write nodesCnt */
   uint32_t nodesCnt = getNodeCount();
@@ -129,6 +132,10 @@ bool ListSerializer::toBinaryFile(const std::string &outFilename) const {
   for (const auto &node : *list_) {
     /* write data length */
     uint32_t dataLen = static_cast<uint32_t>(node.data.length());
+    if (dataLen > DATA_MAX_SZ) {
+      std::cerr << "Data length too big\n";
+      return false;
+    }
     if (!Write(out, dataLen)) {
       std::cerr << "write error\n";
       return false;
